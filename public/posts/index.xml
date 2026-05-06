@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on 思晨的博客</title>
+    <link>http://localhost:1313/posts/</link>
+    <description>Recent content in Posts on 思晨的博客</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Wed, 06 May 2026 17:53:34 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>大学学习的一点感想</title>
+      <link>http://localhost:1313/posts/study-notes/</link>
+      <pubDate>Wed, 06 May 2026 17:53:34 +0800</pubDate>
+      <guid>http://localhost:1313/posts/study-notes/</guid>
+      <description>&lt;p&gt;进入浙江大学已经有一段时间了，想记录一些学习上的感悟。&lt;/p&gt;&#xA;&lt;h2 id=&#34;关于机械工程&#34;&gt;关于机械工程&lt;/h2&gt;&#xA;&lt;p&gt;很多人觉得机械工程就是&amp;quot;拧螺丝&amp;quot;，其实这是一个非常广阔的领域。从精密仪器到航空航天，从机器人到智能制造，机械工程无处不在。&lt;/p&gt;&#xA;&lt;h2 id=&#34;学习方法&#34;&gt;学习方法&lt;/h2&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;&lt;strong&gt;理论与实践结合&lt;/strong&gt;：课堂上的公式推导很重要，但亲手做实验、建模型更能加深理解。&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;跨学科思维&lt;/strong&gt;：现代工程问题很少能用单一学科解决，编程、电子、材料知识都很重要。&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;保持好奇心&lt;/strong&gt;：遇到不懂的问题，多问几个为什么。&lt;/li&gt;&#xA;&lt;/ol&gt;&#xA;&lt;h2 id=&#34;结语&#34;&gt;结语&lt;/h2&gt;&#xA;&lt;p&gt;大学生活才刚刚开始，希望能保持热情，不断探索。也欢迎志同道合的朋友一起交流学习！&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>你好，世界</title>
+      <link>http://localhost:1313/posts/hello-world/</link>
+      <pubDate>Wed, 06 May 2026 17:52:04 +0800</pubDate>
+      <guid>http://localhost:1313/posts/hello-world/</guid>
+      <description>&lt;p&gt;这是我的第一篇博客文章！&lt;/p&gt;&#xA;&lt;h2 id=&#34;为什么开始写博客&#34;&gt;为什么开始写博客&lt;/h2&gt;&#xA;&lt;p&gt;一直以来，我都想有一个属于自己的小角落，可以记录生活中的点滴、学习中的收获，还有那些偶尔冒出来的奇思妙想。&lt;/p&gt;&#xA;&lt;h2 id=&#34;关于这个博客&#34;&gt;关于这个博客&lt;/h2&gt;&#xA;&lt;p&gt;这个博客使用 &lt;strong&gt;Hugo&lt;/strong&gt; 搭建，部署在 GitHub Pages 上，完全免费。主题是简约的卡片杂志风格，希望能给阅读带来舒适的体验。&lt;/p&gt;&#xA;&lt;h2 id=&#34;未来计划&#34;&gt;未来计划&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;记录大学生活的日常&lt;/li&gt;&#xA;&lt;li&gt;分享机械工程专业相关的学习笔记&lt;/li&gt;&#xA;&lt;li&gt;偶尔写一些技术教程和读书心得&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;感谢你的到访，期待在这里与你相遇！&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Post 3</title>
+      <link>http://localhost:1313/posts/post-3/</link>
+      <pubDate>Wed, 15 Mar 2023 11:00:00 -0700</pubDate>
+      <guid>http://localhost:1313/posts/post-3/</guid>
+      <description>&lt;p&gt;Occaecat aliqua consequat laborum ut ex aute aliqua culpa quis irure esse magna dolore quis. Proident fugiat labore eu laboris officia Lorem enim. Ipsum occaecat cillum ut tempor id sint aliqua incididunt nisi incididunt reprehenderit. Voluptate ad minim sint est aute aliquip esse occaecat tempor officia qui sunt. Aute ex ipsum id ut in est velit est laborum incididunt. Aliqua qui id do esse sunt eiusmod id deserunt eu nostrud aute sit ipsum. Deserunt esse cillum Lorem non magna adipisicing mollit amet consequat.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Post 2</title>
+      <link>http://localhost:1313/posts/post-2/</link>
+      <pubDate>Wed, 15 Feb 2023 10:00:00 -0700</pubDate>
+      <guid>http://localhost:1313/posts/post-2/</guid>
+      <description>&lt;p&gt;Anim eiusmod irure incididunt sint cupidatat. Incididunt irure irure irure nisi ipsum do ut quis fugiat consectetur proident cupidatat incididunt cillum. Dolore voluptate occaecat qui mollit laborum ullamco et. Ipsum laboris officia anim laboris culpa eiusmod ex magna ex cupidatat anim ipsum aute. Mollit aliquip occaecat qui sunt velit ut cupidatat reprehenderit enim sunt laborum. Velit veniam in officia nulla adipisicing ut duis officia.&lt;/p&gt;&#xA;&lt;p&gt;Exercitation voluptate irure in irure tempor mollit Lorem nostrud ad officia. Velit id fugiat occaecat do tempor. Sit officia Lorem aliquip eu deserunt consectetur. Aute proident deserunt in nulla aliquip dolore ipsum Lorem ut cupidatat consectetur sit sint laborum. Esse cupidatat sit sint sunt tempor exercitation deserunt. Labore dolor duis laborum est do nisi ut veniam dolor et nostrud nostrud.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Post 1</title>
+      <link>http://localhost:1313/posts/post-1/</link>
+      <pubDate>Sun, 15 Jan 2023 09:00:00 -0700</pubDate>
+      <guid>http://localhost:1313/posts/post-1/</guid>
+      <description>&lt;p&gt;Tempor proident minim aliquip reprehenderit dolor et ad anim Lorem duis sint eiusmod. Labore ut ea duis dolor. Incididunt consectetur proident qui occaecat incididunt do nisi Lorem. Tempor do laborum elit laboris excepteur eiusmod do. Eiusmod nisi excepteur ut amet pariatur adipisicing Lorem.&lt;/p&gt;&#xA;&lt;p&gt;Occaecat nulla excepteur dolore excepteur duis eiusmod ullamco officia anim in voluptate ea occaecat officia. Cillum sint esse velit ea officia minim fugiat. Elit ea esse id aliquip pariatur cupidatat id duis minim incididunt ea ea. Anim ut duis sunt nisi. Culpa cillum sit voluptate voluptate eiusmod dolor. Enim nisi Lorem ipsum irure est excepteur voluptate eu in enim nisi. Nostrud ipsum Lorem anim sint labore consequat do.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>生活 on 思晨的博客</title>
+    <link>http://localhost:1313/tags/%E7%94%9F%E6%B4%BB/</link>
+    <description>Recent content in 生活 on 思晨的博客</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Wed, 06 May 2026 17:52:04 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/%E7%94%9F%E6%B4%BB/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>你好，世界</title>
+      <link>http://localhost:1313/posts/hello-world/</link>
+      <pubDate>Wed, 06 May 2026 17:52:04 +0800</pubDate>
+      <guid>http://localhost:1313/posts/hello-world/</guid>
+      <description>&lt;p&gt;这是我的第一篇博客文章！&lt;/p&gt;&#xA;&lt;h2 id=&#34;为什么开始写博客&#34;&gt;为什么开始写博客&lt;/h2&gt;&#xA;&lt;p&gt;一直以来，我都想有一个属于自己的小角落，可以记录生活中的点滴、学习中的收获，还有那些偶尔冒出来的奇思妙想。&lt;/p&gt;&#xA;&lt;h2 id=&#34;关于这个博客&#34;&gt;关于这个博客&lt;/h2&gt;&#xA;&lt;p&gt;这个博客使用 &lt;strong&gt;Hugo&lt;/strong&gt; 搭建，部署在 GitHub Pages 上，完全免费。主题是简约的卡片杂志风格，希望能给阅读带来舒适的体验。&lt;/p&gt;&#xA;&lt;h2 id=&#34;未来计划&#34;&gt;未来计划&lt;/h2&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;记录大学生活的日常&lt;/li&gt;&#xA;&lt;li&gt;分享机械工程专业相关的学习笔记&lt;/li&gt;&#xA;&lt;li&gt;偶尔写一些技术教程和读书心得&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;感谢你的到访，期待在这里与你相遇！&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

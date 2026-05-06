@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>学习 on 思晨的博客</title>
+    <link>http://localhost:1313/tags/%E5%AD%A6%E4%B9%A0/</link>
+    <description>Recent content in 学习 on 思晨的博客</description>
+    <generator>Hugo</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Wed, 06 May 2026 17:53:34 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/tags/%E5%AD%A6%E4%B9%A0/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>大学学习的一点感想</title>
+      <link>http://localhost:1313/posts/study-notes/</link>
+      <pubDate>Wed, 06 May 2026 17:53:34 +0800</pubDate>
+      <guid>http://localhost:1313/posts/study-notes/</guid>
+      <description>&lt;p&gt;进入浙江大学已经有一段时间了，想记录一些学习上的感悟。&lt;/p&gt;&#xA;&lt;h2 id=&#34;关于机械工程&#34;&gt;关于机械工程&lt;/h2&gt;&#xA;&lt;p&gt;很多人觉得机械工程就是&amp;quot;拧螺丝&amp;quot;，其实这是一个非常广阔的领域。从精密仪器到航空航天，从机器人到智能制造，机械工程无处不在。&lt;/p&gt;&#xA;&lt;h2 id=&#34;学习方法&#34;&gt;学习方法&lt;/h2&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;&lt;strong&gt;理论与实践结合&lt;/strong&gt;：课堂上的公式推导很重要，但亲手做实验、建模型更能加深理解。&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;跨学科思维&lt;/strong&gt;：现代工程问题很少能用单一学科解决，编程、电子、材料知识都很重要。&lt;/li&gt;&#xA;&lt;li&gt;&lt;strong&gt;保持好奇心&lt;/strong&gt;：遇到不懂的问题，多问几个为什么。&lt;/li&gt;&#xA;&lt;/ol&gt;&#xA;&lt;h2 id=&#34;结语&#34;&gt;结语&lt;/h2&gt;&#xA;&lt;p&gt;大学生活才刚刚开始，希望能保持热情，不断探索。也欢迎志同道合的朋友一起交流学习！&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
