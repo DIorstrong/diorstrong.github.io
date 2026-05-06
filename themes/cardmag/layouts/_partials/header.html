@@ -1,0 +1,8 @@
+<header class="site-header">
+  <div class="header-inner">
+    <a href="{{ `/` | relURL }}" class="site-brand">{{ site.Title }}</a>
+    <nav class="site-nav">
+      {{ partial "menu.html" (dict "menuID" "main" "page" .) }}
+    </nav>
+  </div>
+</header>

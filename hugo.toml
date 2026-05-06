@@ -1,0 +1,25 @@
+baseURL = 'https://diorstrong.github.io/'
+defaultContentLanguage = 'zh-cn'
+locale = 'zh-CN'
+title = '思晨的博客'
+theme = 'cardmag'
+
+[params]
+  author = '吴思晨'
+  description = '记录生活，分享思考'
+
+[menus]
+  [[menus.main]]
+    name = '首页'
+    pageRef = '/'
+    weight = 10
+
+  [[menus.main]]
+    name = '文章'
+    pageRef = '/posts'
+    weight = 20
+
+  [[menus.main]]
+    name = '标签'
+    pageRef = '/tags'
+    weight = 30
