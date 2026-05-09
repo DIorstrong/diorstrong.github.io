@@ -294,6 +294,61 @@ a:hover {
   border-top: 1px solid var(--border);
 }
 
+/* === 音乐页专辑卡片 === */
+.album-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  margin: 24px 0;
+  flex-wrap: wrap;
+}
+
+.album-cover {
+  width: 200px;
+  height: 200px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.album-info h3 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  color: var(--text);
+}
+
+.album-info p {
+  color: var(--text-light);
+  margin-bottom: 10px;
+}
+
+.listen-btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.listen-btn:hover {
+  background: var(--accent-hover);
+  color: #fff;
+}
+
+/* === 教育经历页 === */
+.post-content h2 {
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 8px;
+}
+
 /* === 响应式 === */
 @media (max-width: 600px) {
   .hero h1 {

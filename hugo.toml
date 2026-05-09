@@ -20,6 +20,11 @@ theme = 'cardmag'
     weight = 20
 
   [[menus.main]]
-    name = '标签'
-    pageRef = '/tags'
+    name = '音乐'
+    pageRef = '/music'
     weight = 30
+
+  [[menus.main]]
+    name = '教育经历'
+    pageRef = '/education'
+    weight = 40
