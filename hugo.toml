@@ -8,6 +8,9 @@ theme = 'cardmag'
   author = '吴思晨'
   description = '记录生活，分享思考'
 
+[markup.goldmark.renderer]
+  unsafe = true
+
 [menus]
   [[menus.main]]
     name = '首页'
