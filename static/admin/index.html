@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>内容管理后台</title>
+  <link rel="stylesheet" href="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.css">
+  <style>
+    /* 自定义 CMS 主题色，与博客主色调保持一致 */
+    :root {
+      --primary: #ff6b6b;
+      --primary-hover: #fa5252;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <!-- 加载 Decap CMS -->
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+
+  <!-- 自定义预览样式（可选） -->
+  <script>
+    // 注册自定义预览样式，让 CMS 中的预览更接近实际网站效果
+    CMS.registerPreviewStyle("/admin/preview.css");
+
+    // 注册文章预览模板
+    CMS.registerPreviewTemplate("posts", createClass({
+      render: function() {
+        var entry = this.props.entry;
+        var title = entry.getIn(["data", "title"]);
+        var date = entry.getIn(["data", "date"]);
+        var tags = entry.getIn(["data", "tags"]) || [];
+        var cover = entry.getIn(["data", "cover"]);
+        var body = this.props.widgetFor("body");
+
+        return h('article', {className: 'cms-preview-post'},
+          h('header', {className: 'cms-preview-header'},
+            h('h1', {}, title),
+            h('div', {className: 'cms-preview-meta'},
+              date ? h('time', {}, new Date(date).toLocaleDateString('zh-CN')) : null,
+              tags.size > 0 ? h('span', {className: 'cms-preview-tags'},
+                tags.map(function(tag) {
+                  return h('span', {className: 'cms-preview-tag', key: tag}, tag);
+                }).toArray()
+              ) : null
+            )
+          ),
+          cover ? h('img', {src: cover, className: 'cms-preview-cover', alt: title}) : null,
+          h('div', {className: 'cms-preview-body'}, body)
+        );
+      }
+    }));
+  </script>
+</body>
+</html>

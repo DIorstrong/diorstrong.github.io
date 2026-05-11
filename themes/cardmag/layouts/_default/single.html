@@ -15,6 +15,11 @@
       {{ end }}
     </div>
   </header>
+  {{ with .Params.cover }}
+  <div class="post-cover">
+    <img src="{{ . | relURL }}" alt="{{ $.Title }}" loading="lazy">
+  </div>
+  {{ end }}
   <div class="post-content">
     {{ .Content }}
   </div>

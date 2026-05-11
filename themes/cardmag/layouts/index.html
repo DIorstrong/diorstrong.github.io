@@ -7,6 +7,11 @@
 <div class="card-grid">
   {{ range where site.RegularPages "Section" "posts" }}
   <article class="card">
+    {{ with .Params.cover }}
+    <div class="card-cover">
+      <img src="{{ . | relURL }}" alt="{{ $.Title }}" loading="lazy">
+    </div>
+    {{ end }}
     <div class="card-body">
       <div class="card-meta">
         <time datetime="{{ .Date | time.Format `2006-01-02T15:04:05-07:00` }}">
@@ -21,7 +26,7 @@
         {{ end }}
       </div>
       <h2 class="card-title"><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></h2>
-      <p class="card-summary">{{ .Summary }}</p>
+      <p class="card-summary">{{ .Params.description | default .Summary }}</p>
       <a href="{{ .RelPermalink }}" class="read-more">阅读全文 →</a>
     </div>
   </article>
