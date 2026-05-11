@@ -3,55 +3,285 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>内容管理后台</title>
-  <link rel="stylesheet" href="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.css">
+  <title>内容管理后台 — 思晨的博客</title>
   <style>
-    /* 自定义 CMS 主题色，与博客主色调保持一致 */
-    :root {
-      --primary: #ff6b6b;
-      --primary-hover: #fa5252;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: #f5f6f8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+
+    /* 登录面板 */
+    .login-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+    }
+    .login-card h1 {
+      font-size: 1.6rem;
+      color: #2d2d2d;
+      margin-bottom: 6px;
+    }
+    .login-card .subtitle {
+      color: #888;
+      font-size: 0.9rem;
+      margin-bottom: 32px;
+    }
+
+    .step-list {
+      text-align: left;
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+      color: #555;
+      line-height: 1.8;
+    }
+    .step-list a {
+      color: #ff6b6b;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .step-list a:hover { text-decoration: underline; }
+    .step-list code {
+      background: #eee;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    .token-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #e9ecef;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+      transition: border-color 0.2s;
+      font-family: "SF Mono", Monaco, monospace;
+    }
+    .token-input:focus {
+      outline: none;
+      border-color: #ff6b6b;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #ff6b6b;
+      color: #fff;
+    }
+    .btn-primary:hover { background: #fa5252; }
+    .btn-primary:disabled {
+      background: #ffb3b3;
+      cursor: not-allowed;
+    }
+
+    .error {
+      color: #ff6b6b;
+      font-size: 0.85rem;
+      margin-top: 10px;
+      min-height: 20px;
+    }
+    .success {
+      color: #40c057;
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
+
+    .logout-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: #fff;
+      border-bottom: 1px solid #e9ecef;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 9999;
+      font-size: 0.85rem;
+      color: #666;
+    }
+    .logout-bar button {
+      background: transparent;
+      border: 1px solid #e9ecef;
+      padding: 4px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: #666;
+    }
+    .logout-bar button:hover {
+      border-color: #ff6b6b;
+      color: #ff6b6b;
+    }
+
+    /* CMS 加载后的容器 */
+    #cms-container { width: 100%; height: 100vh; padding-top: 40px; }
   </style>
 </head>
 <body>
-  <!-- 加载 Decap CMS -->
-  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 
-  <!-- 自定义预览样式（可选） -->
+  <div id="app"></div>
+
   <script>
-    // 注册自定义预览样式，让 CMS 中的预览更接近实际网站效果
-    CMS.registerPreviewStyle("/admin/preview.css");
+    const REPO = 'diorstrong/diorstrong.github.io';
+    const BRANCH = 'main';
 
-    // 注册文章预览模板
-    CMS.registerPreviewTemplate("posts", createClass({
-      render: function() {
-        var entry = this.props.entry;
-        var title = entry.getIn(["data", "title"]);
-        var date = entry.getIn(["data", "date"]);
-        var tags = entry.getIn(["data", "tags"]) || [];
-        var cover = entry.getIn(["data", "cover"]);
-        var body = this.props.widgetFor("body");
+    // ========== 工具函数 ==========
+    function $(id) { return document.getElementById(id); }
 
-        return h('article', {className: 'cms-preview-post'},
-          h('header', {className: 'cms-preview-header'},
-            h('h1', {}, title),
-            h('div', {className: 'cms-preview-meta'},
-              date ? h('time', {}, new Date(date).toLocaleDateString('zh-CN')) : null,
-              tags.size > 0 ? h('span', {className: 'cms-preview-tags'},
-                tags.map(function(tag) {
-                  return h('span', {className: 'cms-preview-tag', key: tag}, tag);
-                }).toArray()
-              ) : null
-            )
-          ),
-          cover ? h('img', {src: cover, className: 'cms-preview-cover', alt: title}) : null,
-          h('div', {className: 'cms-preview-body'}, body)
-        );
+    function getToken() {
+      try {
+        const raw = localStorage.getItem('decap-cms-user') || localStorage.getItem('netlify-cms-user');
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        return data.token || null;
+      } catch(e) { return null; }
+    }
+
+    function saveToken(token) {
+      const payload = JSON.stringify({ backendName: 'github', token });
+      localStorage.setItem('decap-cms-user', payload);
+      localStorage.setItem('netlify-cms-user', payload);
+    }
+
+    function clearToken() {
+      localStorage.removeItem('decap-cms-user');
+      localStorage.removeItem('netlify-cms-user');
+    }
+
+    async function verifyToken(token) {
+      try {
+        const res = await fetch('https://api.github.com/user', {
+          headers: {
+            'Authorization': 'token ' + token,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        });
+        return res.ok;
+      } catch(e) { return false; }
+    }
+
+    // ========== 界面 ==========
+    function renderLogin(msg) {
+      $('app').innerHTML = `
+        <div class="login-card">
+          <h1>思晨的博客</h1>
+          <p class="subtitle">内容管理后台</p>
+
+          <div class="step-list">
+            <b>首次使用？按下面 3 步获取 Token：</b><br>
+            1. 点击 <a href="https://github.com/settings/tokens/new" target="_blank">生成 GitHub Token</a><br>
+            2. Note 填 <code>博客 CMS</code>，勾选 <b>repo</b> 权限<br>
+            3. 点击 Generate token，复制生成的 token 粘贴到下方
+          </div>
+
+          <input type="password" id="token-input" class="token-input"
+            placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+          <button class="btn btn-primary" id="login-btn" onclick="doLogin()">登录</button>
+
+          <div id="msg" class="error">${msg || ''}</div>
+        </div>
+      `;
+      $('token-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') doLogin();
+      });
+    }
+
+    async function doLogin() {
+      const input = $('token-input');
+      const btn = $('login-btn');
+      const msg = $('msg');
+      const token = input.value.trim();
+
+      if (!token) {
+        msg.className = 'error';
+        msg.textContent = '请输入 token';
+        return;
       }
-    }));
+
+      btn.disabled = true;
+      msg.className = 'success';
+      msg.textContent = '正在验证...';
+
+      const ok = await verifyToken(token);
+      if (ok) {
+        saveToken(token);
+        msg.className = 'success';
+        msg.textContent = '验证通过，正在加载...';
+        setTimeout(() => location.reload(), 300);
+      } else {
+        btn.disabled = false;
+        msg.className = 'error';
+        msg.textContent = 'Token 无效或已过期，请检查是否复制完整';
+      }
+    }
+
+    function renderCMS() {
+      $('app').innerHTML = `
+        <div class="logout-bar">
+          <span>已登录 GitHub · 仓库：${REPO}</span>
+          <button onclick="doLogout()">退出登录</button>
+        </div>
+        <div id="cms-container"></div>
+      `;
+
+      // 加载 Decap CMS
+      const s = document.createElement('script');
+      s.src = 'https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js';
+      s.onload = () => {
+        // 注册自定义预览样式
+        if (window.CMS) {
+          CMS.registerPreviewStyle('/admin/preview.css');
+        }
+      };
+      document.body.appendChild(s);
+    }
+
+    function doLogout() {
+      clearToken();
+      location.reload();
+    }
+
+    // ========== 主流程 ==========
+    async function main() {
+      const token = getToken();
+      if (!token) {
+        renderLogin('');
+        return;
+      }
+
+      // 已有 token，验证有效性
+      const ok = await verifyToken(token);
+      if (ok) {
+        renderCMS();
+      } else {
+        clearToken();
+        renderLogin('登录已过期，请重新输入 token');
+      }
+    }
+
+    main();
   </script>
+
 </body>
 </html>
