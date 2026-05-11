@@ -3,9 +3,8 @@ backend:
   repo: diorstrong/diorstrong.github.io
   branch: main
   base_url: https://diorstrong.github.io
-  # 认证端点 —— 需要在 GitHub OAuth App 中配置回调地址
-  # 详见 setup-guide.md 中的 OAuth 配置说明
-  auth_endpoint: oauth
+  # 认证端点 —— Cloudflare Workers OAuth 代理
+  auth_endpoint: https://diorstrong-cms.wusichen666.workers.dev
 
 # 图片上传配置
 media_folder: "static/images/uploads"
