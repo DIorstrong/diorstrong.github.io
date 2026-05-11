@@ -3,321 +3,110 @@ backend:
   repo: diorstrong/diorstrong.github.io
   branch: main
   base_url: https://diorstrong.github.io
-  # 认证端点 —— Cloudflare Workers OAuth 代理
   auth_endpoint: https://diorstrong-cms.wusichen666.workers.dev
 
-# 图片上传配置
-media_folder: "static/images/uploads"
-public_folder: "/images/uploads"
+media_folder: static/images/uploads
+public_folder: /images/uploads
 
-# 站点本地化
-locale: 'zh'
+locale: zh
 
-# 搜索设置
-search: true
-
-# 编辑器设置
-editor:
-  preview: true
-
-# 内容集合定义
 collections:
-  # ==================== 文章 ====================
-  - name: "posts"
-    label: "文章"
-    label_singular: "文章"
-    folder: "content/posts"
+  - name: posts
+    label: 文章
+    folder: content/posts
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     preview_path: "posts/{{slug}}"
-    sortable_fields: ['date', 'title']
-    view_filters:
-      - label: 草稿
-        field: draft
-        pattern: true
-      - label: 已发布
-        field: draft
-        pattern: false
     fields:
-      - label: "标题"
-        name: "title"
-        widget: "string"
-        required: true
-        hint: "文章标题，会显示在首页卡片和文章页顶部"
+      - label: 标题
+        name: title
+        widget: string
 
-      - label: "发布日期"
-        name: "date"
-        widget: "datetime"
-        date_format: "YYYY-MM-DD"
-        time_format: "HH:mm"
-        format: "YYYY-MM-DDTHH:mm:ss+08:00"
-        default: ""
-        required: true
-        hint: "文章的发布日期和时间"
+      - label: 发布日期
+        name: date
+        widget: datetime
+        date_format: YYYY-MM-DD
+        time_format: HH:mm
+        format: YYYY-MM-DDTHH:mm:ss+08:00
 
-      - label: "草稿状态"
-        name: "draft"
-        widget: "boolean"
+      - label: 草稿
+        name: draft
+        widget: boolean
         default: true
-        hint: "勾选表示草稿（不会发布），取消勾选表示正式发布"
 
-      - label: "标签"
-        name: "tags"
-        widget: "list"
+      - label: 标签
+        name: tags
+        widget: list
+        field:
+          label: 标签
+          name: tag
+          widget: string
+
+      - label: 摘要
+        name: description
+        widget: text
         required: false
-        hint: "给文章打上标签，方便分类查找。例如：随笔、生活、学习、技术"
-        field: { label: "标签", name: "tag", widget: "string" }
 
-      - label: "摘要"
-        name: "description"
-        widget: "text"
+      - label: 封面图
+        name: cover
+        widget: image
         required: false
-        hint: "文章的简短描述，会显示在首页卡片上。如果不填，系统会自动截取正文前几句"
 
-      - label: "封面图"
-        name: "cover"
-        widget: "image"
-        required: false
-        media_library:
-          config:
-            multiple: false
-        hint: "文章的封面图片，会显示在首页卡片顶部"
+      - label: 正文
+        name: body
+        widget: markdown
 
-      - label: "正文"
-        name: "body"
-        widget: "markdown"
-        required: true
-        hint: "支持 Markdown 语法，也可以使用编辑器工具栏排版"
-        buttons:
-          - bold
-          - italic
-          - link
-          - heading-one
-          - heading-two
-          - heading-three
-          - quote
-          - code
-          - code-block
-          - bulleted-list
-          - numbered-list
-          - image
-        editor_components:
-          - image
-
-  # ==================== 独立页面 ====================
-  - name: "pages"
-    label: "独立页面"
-    label_singular: "独立页面"
-    folder: "content"
+  - name: pages
+    label: 独立页面
+    folder: content
     create: true
     slug: "{{slug}}"
-    preview_path: "{{slug}}"
     filter:
       field: type
       value: page
     fields:
-      - label: "标题"
-        name: "title"
-        widget: "string"
-        required: true
+      - label: 标题
+        name: title
+        widget: string
 
-      - label: "页面类型"
-        name: "type"
-        widget: "hidden"
-        default: "page"
+      - label: 类型
+        name: type
+        widget: hidden
+        default: page
 
-      - label: "日期"
-        name: "date"
-        widget: "datetime"
-        date_format: "YYYY-MM-DD"
-        time_format: "HH:mm"
-        format: "YYYY-MM-DDTHH:mm:ss+08:00"
-        required: false
-
-      - label: "草稿状态"
-        name: "draft"
-        widget: "boolean"
+      - label: 草稿
+        name: draft
+        widget: boolean
         default: false
 
-      - label: "正文"
-        name: "body"
-        widget: "markdown"
-        required: true
-        buttons:
-          - bold
-          - italic
-          - link
-          - heading-one
-          - heading-two
-          - heading-three
-          - quote
-          - code
-          - code-block
-          - bulleted-list
-          - numbered-list
-          - image
-        editor_components:
-          - image
+      - label: 正文
+        name: body
+        widget: markdown
 
-  # ==================== 音乐页面（单页面编辑）====================
-  - name: "music-page"
-    label: "音乐页面"
+  - name: music-page
+    label: 音乐页面
     files:
-      - label: "我的音乐"
-        name: "music"
-        file: "content/music.md"
+      - label: 我的音乐
+        name: music
+        file: content/music.md
         fields:
-          - label: "标题"
-            name: "title"
-            widget: "string"
-            required: true
+          - label: 标题
+            name: title
+            widget: string
+          - label: 正文
+            name: body
+            widget: markdown
 
-          - label: "日期"
-            name: "date"
-            widget: "datetime"
-            date_format: "YYYY-MM-DD"
-            time_format: "HH:mm"
-            format: "YYYY-MM-DDTHH:mm:ss+08:00"
-            required: false
-
-          - label: "草稿状态"
-            name: "draft"
-            widget: "boolean"
-            default: false
-
-          - label: "正文"
-            name: "body"
-            widget: "markdown"
-            required: true
-            buttons:
-              - bold
-              - italic
-              - link
-              - heading-one
-              - heading-two
-              - heading-three
-              - quote
-              - code
-              - code-block
-              - bulleted-list
-              - numbered-list
-              - image
-            editor_components:
-              - image
-
-  # ==================== 教育经历页面（单页面编辑）====================
-  - name: "education-page"
-    label: "教育经历页面"
+  - name: education-page
+    label: 教育经历页面
     files:
-      - label: "教育经历"
-        name: "education"
-        file: "content/education.md"
+      - label: 教育经历
+        name: education
+        file: content/education.md
         fields:
-          - label: "标题"
-            name: "title"
-            widget: "string"
-            required: true
-
-          - label: "日期"
-            name: "date"
-            widget: "datetime"
-            date_format: "YYYY-MM-DD"
-            time_format: "HH:mm"
-            format: "YYYY-MM-DDTHH:mm:ss+08:00"
-            required: false
-
-          - label: "草稿状态"
-            name: "draft"
-            widget: "boolean"
-            default: false
-
-          - label: "正文"
-            name: "body"
-            widget: "markdown"
-            required: true
-            buttons:
-              - bold
-              - italic
-              - link
-              - heading-one
-              - heading-two
-              - heading-three
-              - quote
-              - code
-              - code-block
-              - bulleted-list
-              - numbered-list
-              - image
-            editor_components:
-              - image
-
-  # ==================== 站点设置 ====================
-  - name: "site-settings"
-    label: "站点设置"
-    files:
-      - label: "站点配置"
-        name: "hugo-config"
-        file: "hugo.toml"
-        fields:
-          - label: "网站标题"
-            name: "title"
-            widget: "string"
-            required: true
-            hint: "显示在浏览器标签页和首页顶部"
-
-          - label: "基础地址"
-            name: "baseURL"
-            widget: "string"
-            required: true
-            hint: "网站的完整 URL"
-
-          - label: "作者名称"
-            name: "params.author"
-            widget: "string"
-            required: false
-            hint: "显示在页脚版权信息中"
-
-          - label: "站点描述"
-            name: "params.description"
-            widget: "text"
-            required: false
-            hint: "显示在首页 Hero 区域"
-
-          - label: "默认语言"
-            name: "defaultContentLanguage"
-            widget: "select"
-            options:
-              - { label: "简体中文", value: "zh-cn" }
-              - { label: "英文", value: "en" }
-            default: "zh-cn"
-
-          - label: "主题"
-            name: "theme"
-            widget: "hidden"
-            default: "cardmag"
-
-      - label: "导航菜单"
-        name: "menus"
-        file: "hugo.toml"
-        fields:
-          - label: "菜单项"
-            name: "menus.main"
-            widget: "list"
-            fields:
-              - label: "名称"
-                name: "name"
-                widget: "string"
-                required: true
-
-              - label: "页面引用"
-                name: "pageRef"
-                widget: "string"
-                required: true
-                hint: "例如：/posts 表示文章列表页"
-
-              - label: "排序权重"
-                name: "weight"
-                widget: "number"
-                value_type: "int"
-                default: 10
-                hint: "数字越小越靠前"
+          - label: 标题
+            name: title
+            widget: string
+          - label: 正文
+            name: body
+            widget: markdown
