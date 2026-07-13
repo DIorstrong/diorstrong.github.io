@@ -3,11 +3,34 @@
 <head>
   {{ partial "head.html" . }}
 </head>
-<body>
+<body class="dark-theme{{ if .IsHome }} is-home{{ end }}">
   {{ partial "header.html" . }}
   <main>
     {{ block "main" . }}{{ end }}
   </main>
   {{ partial "footer.html" . }}
+
+  {{/* 非首页：色相呼吸 + 入场动画 */}}
+  {{ if not .IsHome }}
+  <script>
+  (function() {
+    var hue = 200;
+    setInterval(function() {
+      hue = (hue + 0.06) % 360;
+      document.documentElement.style.setProperty('--hue', Math.round(hue));
+    }, 50);
+
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof gsap === 'undefined') return;
+      var main = document.querySelector('main');
+      if (!main) return;
+      gsap.from(main.children, {
+        opacity: 0, y: 28, duration: 0.55, stagger: 0.06,
+        ease: 'power3.out', delay: 0.1
+      });
+    });
+  })();
+  </script>
+  {{ end }}
 </body>
 </html>

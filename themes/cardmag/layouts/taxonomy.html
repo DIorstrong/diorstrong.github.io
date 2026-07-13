@@ -1,7 +1,13 @@
 {{ define "main" }}
+<div class="content-page">
   <h1>{{ .Title }}</h1>
-  {{ .Content }}
-  {{ range .Pages }}
-    <h2><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></h2>
+  {{ with .Content }}
+  <div class="page-desc">{{ . }}</div>
   {{ end }}
+  <div class="tag-cloud">
+    {{ range .Pages }}
+    <a href="{{ .RelPermalink }}" class="tag-link">{{ .LinkTitle }} <small>({{ len .Pages }})</small></a>
+    {{ end }}
+  </div>
+</div>
 {{ end }}

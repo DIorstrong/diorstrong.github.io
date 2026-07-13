@@ -9,7 +9,7 @@
       {{ with .Params.tags }}
       <span class="tags">
         {{ range . }}
-        <span class="tag">{{ . }}</span>
+        <a href="{{ `/tags/` | relURL }}{{ . | urlize }}" class="tag">{{ . }}</a>
         {{ end }}
       </span>
       {{ end }}
@@ -23,5 +23,8 @@
   <div class="post-content">
     {{ .Content }}
   </div>
+  <footer class="post-footer">
+    <a href="{{ `/posts/` | relURL }}" class="back-link">← 返回文章列表</a>
+  </footer>
 </article>
 {{ end }}

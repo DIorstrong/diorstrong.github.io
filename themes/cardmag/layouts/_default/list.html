@@ -1,10 +1,28 @@
 {{ define "main" }}
+<div class="content-page">
   <h1>{{ .Title }}</h1>
-  {{ .Content }}
-  {{ range .Pages }}
-    <section>
-      <h2><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></h2>
-      {{ .Summary }}
-    </section>
+  {{ with .Content }}
+  <div class="page-desc">{{ . }}</div>
   {{ end }}
+  <div class="content-card-list">
+    {{ range .Pages }}
+    <article class="content-card">
+      <h2><a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a></h2>
+      <div class="card-meta">
+        <time datetime="{{ .Date | time.Format `2006-01-02T15:04:05-07:00` }}">
+          {{ .Date | time.Format "2006年01月02日" }}
+        </time>
+        {{ with .Params.tags }}
+        <span class="tags">
+          {{ range . }}
+          <span class="tag">{{ . }}</span>
+          {{ end }}
+        </span>
+        {{ end }}
+      </div>
+      <p class="card-excerpt">{{ .Params.description | default .Summary }}</p>
+    </article>
+    {{ end }}
+  </div>
+</div>
 {{ end }}

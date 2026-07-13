@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>吴思晨 · Moments</title>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+  :root {
+    --hue: 200;
+    --card-w: 280px;
+    --card-h: 380px;
+    --gap: 24px;
+  }
+
+  body {
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background: #0a0a0f;
+    overflow-x: hidden;
+    cursor: none;
+    -webkit-font-smoothing: antialiased;
+    height: 100vh;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* ===== 彩虹渐变背景 ===== */
+  .bg-layer {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at 50% 50%,
+      hsl(var(--hue), 60%, 18%) 0%,
+      hsl(calc(var(--hue) + 40), 50%, 10%) 40%,
+      #0d0d14 100%);
+    transition: background 0.3s ease;
+  }
+  .bg-layer::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 30% 40%, hsl(calc(var(--hue) + 120), 70%, 20%, 0.15), transparent 60%),
+                radial-gradient(circle at 70% 60%, hsl(calc(var(--hue) - 60), 70%, 20%, 0.12), transparent 60%),
+                radial-gradient(circle at 50% 50%, hsl(var(--hue), 80%, 25%, 0.08), transparent 70%);
+    animation: bg-shift 8s ease-in-out infinite alternate;
+  }
+  @keyframes bg-shift {
+    0% { opacity: 0.7; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.15); }
+  }
+
+  /* ===== 粒子画布 ===== */
+  #particle-canvas {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1; pointer-events: none;
+  }
+
+  /* ===== 自定义光标 ===== */
+  .cursor {
+    position: fixed; z-index: 999;
+    width: 20px; height: 20px;
+    border: 2px solid hsl(var(--hue), 80%, 60%);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s, height 0.3s, border-color 0.3s;
+    box-shadow: 0 0 15px hsl(var(--hue), 80%, 50%, 0.5);
+  }
+  .cursor-dot {
+    position: fixed; z-index: 999;
+    width: 4px; height: 4px;
+    background: hsl(var(--hue), 90%, 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 8px hsl(var(--hue), 90%, 60%, 0.8);
+  }
+
+  /* ===== 标题覆盖层 ===== */
+  .title-overlay {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 10; pointer-events: none;
+    text-align: center; padding: 30px 24px 0;
+    background: linear-gradient(to bottom, rgba(10,10,15,0.95) 40%, transparent 100%);
+  }
+  .title-overlay h1 {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    background: linear-gradient(135deg, hsl(var(--hue), 90%, 75%), hsl(calc(var(--hue) + 60), 80%, 65%), hsl(calc(var(--hue) + 120), 70%, 60%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 15px hsl(var(--hue), 80%, 50%, 0.3));
+  }
+  .title-overlay p {
+    font-size: 0.9rem; color: hsl(var(--hue), 50%, 60%);
+    letter-spacing: 0.15em; margin-top: 4px;
+  }
+
+  /* ===== 卡片滚轮容器 ===== */
+  .strip-viewport {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100vh;
+    z-index: 5;
+    perspective: 1400px;
+    overflow: hidden;
+  }
+  .strip-track {
+    position: absolute;
+    top: 50%; left: 0;
+    transform-style: preserve-3d;
+    will-change: transform;
+    display: flex;
+    gap: var(--gap);
+    padding: 0 calc(50vw - var(--card-w) / 2);
+    align-items: center;
+    height: var(--card-h);
+    margin-top: calc(var(--card-h) / -2);
+  }
+
+  /* ===== 卡片 ===== */
+  .moment-card {
+    flex-shrink: 0;
+    width: var(--card-w);
+    height: var(--card-h);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    will-change: transform;
+    transition: box-shadow 0.4s ease;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+  .moment-card .card-inner {
+    width: 100%; height: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #1a1a2e;
+    border: 2px solid hsla(var(--hue), 60%, 55%, 0.3);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .moment-card .card-inner img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: filter 0.4s ease;
+  }
+  /* 卡片光泽覆盖（极淡） */
+  .moment-card .card-shine {
+    position: absolute; inset: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg,
+      hsla(var(--hue), 90%, 85%, 0.05) 0%,
+      transparent 50%,
+      transparent 70%,
+      hsla(calc(var(--hue) + 180), 80%, 75%, 0.03) 100%);
+    pointer-events: none;
+  }
+  .moment-card .card-date {
+    position: absolute; bottom: 12px; left: 12px;
+    font-size: 0.7rem; color: rgba(255,255,255,0.7);
+    background: rgba(0,0,0,0.4);
+    padding: 4px 10px; border-radius: 20px;
+    letter-spacing: 0.05em; pointer-events: none;
+  }
+  /* 悬停放大 */
+  .moment-card:hover .card-inner {
+    border-color: hsl(var(--hue), 90%, 65%) !important;
+    box-shadow: 0 0 25px hsla(var(--hue), 80%, 55%, 0.4), 0 0 50px hsla(var(--hue), 70%, 45%, 0.2), 0 8px 24px rgba(0,0,0,0.2);
+    transform: scale(1.15) translateY(-10px);
+    z-index: 20;
+  }
+  .moment-card:hover .card-inner img {
+    filter: brightness(1.08) contrast(1.02);
+  }
+
+  /* ===== 底部按钮 ===== */
+  .enter-blog-btn {
+    position: fixed; bottom: 36px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 15; pointer-events: auto;
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 32px;
+    background: hsla(var(--hue), 60%, 40%, 0.18);
+    border: 1.5px solid hsla(var(--hue), 80%, 55%, 0.45);
+    border-radius: 50px;
+    color: hsl(var(--hue), 85%, 75%);
+    font-size: 1rem; font-weight: 700;
+    font-family: inherit;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.35s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+  }
+  .enter-blog-btn:hover {
+    background: hsla(var(--hue), 60%, 45%, 0.3);
+    border-color: hsl(var(--hue), 90%, 65%);
+    box-shadow: 0 0 35px hsla(var(--hue), 80%, 50%, 0.5), 0 0 60px hsla(var(--hue), 70%, 40%, 0.25);
+    transform: translateX(-50%) translateY(-3px);
+    color: #fff;
+  }
+  .enter-blog-btn .btn-arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    font-size: 1.1rem;
+  }
+  .enter-blog-btn:hover .btn-arrow {
+    transform: translateY(3px);
+  }
+
+  /* 底部提示小字 */
+  .bottom-hint {
+    position: fixed; bottom: 100px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 10; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .bottom-hint span {
+    font-size: 0.7rem; letter-spacing: 0.2em;
+    color: hsl(var(--hue), 50%, 55%);
+  }
+  .hint-dots {
+    display: flex; gap: 6px;
+  }
+  .hint-dots .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: hsl(var(--hue), 60%, 50%);
+    animation: dot-pulse 2s ease-in-out infinite;
+  }
+  .hint-dots .dot:nth-child(2) { animation-delay: 0.2s; }
+  .hint-dots .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dot-pulse {
+    0%,100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.5); }
+  }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 768px) {
+    :root { --card-w: 220px; --card-h: 300px; --gap: 16px; }
+    .cursor, .cursor-dot { display: none; }
+    body { cursor: auto; }
+  }
+  @media (max-width: 480px) {
+    :root { --card-w: 180px; --card-h: 250px; --gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-layer" id="bgLayer"></div>
+<canvas id="particle-canvas"></canvas>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- 标题 -->
+<div class="title-overlay">
+  <h1>吴思晨</h1>
+  <p>朋友圈 · 精选时刻</p>
+</div>
+
+<!-- 卡片滚轮 -->
+<div class="strip-viewport" id="viewport">
+  <div class="strip-track" id="stripTrack">
+    <!-- JS 动态生成 -->
+  </div>
+</div>
+
+<!-- 底部提示 + 按钮 -->
+<div class="bottom-hint" id="bottomHint">
+  <span>移动鼠标探索照片</span>
+</div>
+<a href="/" class="enter-blog-btn" id="enterBlogBtn">
+  进入博客
+  <span class="btn-arrow">↓</span>
+</a>
+
+<script>
+// ============================================================
+// 照片列表
+// ============================================================
+const PHOTOS = [
+  "微信图片_20260531203241_484_8.jpg","微信图片_20260531203245_485_8.jpg",
+  "微信图片_20260531203249_486_8.jpg","微信图片_20260531203253_487_8.jpg",
+  "微信图片_20260531203257_488_8.jpg","微信图片_20260531203300_489_8.jpg",
+  "微信图片_20260531203303_490_8.jpg","微信图片_20260531203305_491_8.jpg",
+  "微信图片_20260531203308_492_8.jpg","微信图片_20260531203310_493_8.jpg",
+  "微信图片_20260531203313_494_8.jpg","微信图片_20260531203316_495_8.jpg",
+  "微信图片_20260531203318_496_8.jpg","微信图片_20260531203321_497_8.jpg",
+  "微信图片_20260531203324_498_8.jpg","微信图片_20260531203326_499_8.jpg",
+  "微信图片_20260531203329_500_8.jpg","微信图片_20260531203332_501_8.jpg",
+  "微信图片_20260531203341_502_8.jpg","微信图片_20260531203343_503_8.jpg",
+  "微信图片_20260531203346_504_8.jpg","微信图片_20260531203348_505_8.jpg",
+  "微信图片_20260531203351_506_8.jpg","微信图片_20260531203353_507_8.jpg",
+  "微信图片_20260531203356_508_8.jpg","微信图片_20260531203358_509_8.jpg",
+  "微信图片_20260531203400_510_8.jpg","微信图片_20260531203403_511_8.jpg",
+  "微信图片_20260531203409_512_8.jpg","微信图片_20260531203411_513_8.jpg",
+  "微信图片_20260531203413_514_8.jpg","微信图片_20260531203418_515_8.jpg",
+  "微信图片_20260531203421_516_8.jpg","微信图片_20260531203427_517_8.jpg",
+  "微信图片_20260531203430_518_8.jpg"
+];
+
+const IMG_BASE = '/moments/';
+
+// ============================================================
+// DOM 引用
+// ============================================================
+const stripTrack = document.getElementById('stripTrack');
+const viewport = document.getElementById('viewport');
+const cursor = document.getElementById('cursor');
+const cursorDot = document.getElementById('cursorDot');
+const bgLayer = document.getElementById('bgLayer');
+const bottomHint = document.getElementById('bottomHint');
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+
+// ============================================================
+// 全局状态
+// ============================================================
+let hue = 200;                    // 当前色相 (0-360)
+let targetHue = 200;             // 目标色相
+let mouseX = window.innerWidth / 2;
+let mouseY = window.innerHeight / 2;
+let targetMouseX = mouseX;
+let targetMouseY = mouseY;
+let stripTargetX = 0;
+let stripCurrentX = 0;
+let totalStripWidth = 0;
+let cardElements = [];
+
+// ============================================================
+// 生成卡片
+// ============================================================
+function buildCards() {
+  const cardW = getCardW();
+  const gap = getGap();
+  stripTrack.innerHTML = '';
+
+  PHOTOS.forEach((filename, i) => {
+    const card = document.createElement('div');
+    card.className = 'moment-card';
+    card.innerHTML = `
+      <div class="card-inner">
+        <img src="${IMG_BASE}${filename}" alt="Moment ${i+1}" loading="lazy">
+        <div class="card-shine"></div>
+      </div>
+    `;
+    // 每个卡片初始略有旋转，更有机感
+    const baseRotate = (Math.random() - 0.5) * 4;
+    card.dataset.baseRotate = baseRotate;
+    card.dataset.index = i;
+    stripTrack.appendChild(card);
+  });
+
+  cardElements = [...stripTrack.querySelectorAll('.moment-card')];
+  totalStripWidth = PHOTOS.length * (cardW + gap) - gap;
+
+  // 初始位置：显示中间部分
+  stripCurrentX = -(totalStripWidth / 2 - window.innerWidth / 2);
+  stripTargetX = stripCurrentX;
+  gsap.set(stripTrack, { x: stripCurrentX });
+}
+
+function getCardW() {
+  return parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-w'));
+}
+function getGap() {
+  return parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap'));
+}
+
+// ============================================================
+// 粒子系统（彩虹版）
+// ============================================================
+let width, height;
+let particles = [];
+const PC = 70;
+
+function initParticles() {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+  particles = [];
+  for (let i = 0; i < PC; i++) {
+    particles.push({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      r: Math.random() * 2 + 0.8,
+      hueOffset: Math.random() * 360,
+      opacity: 0.2 + Math.random() * 0.5
+    });
+  }
+}
+
+function drawParticles() {
+  ctx.clearRect(0, 0, width, height);
+
+  for (const p of particles) {
+    p.vx += (Math.random() - 0.5) * 0.015;
+    p.vy += (Math.random() - 0.5) * 0.015;
+    p.vx *= 0.998; p.vy *= 0.998;
+
+    // 鼠标吸引
+    const dx = p.x - mouseX, dy = p.y - mouseY;
+    const dist = Math.hypot(dx, dy);
+    if (dist < 160 && dist > 0) {
+      const f = (160 - dist) / 160;
+      p.vx += Math.cos(Math.atan2(dy, dx)) * f * 0.12;
+      p.vy += Math.sin(Math.atan2(dy, dx)) * f * 0.12;
+      p.opacity = Math.min(0.9, p.opacity + 0.015);
+    } else {
+      p.opacity = Math.max(0.1, p.opacity - 0.003);
+    }
+
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < -30) p.x = width + 30;
+    if (p.x > width + 30) p.x = -30;
+    if (p.y < -30) p.y = height + 30;
+    if (p.y > height + 30) p.y = -30;
+
+    // 每个粒子有自己的色相偏移
+    const pHue = (hue + p.hueOffset) % 360;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${pHue}, 70%, 60%, ${p.opacity})`;
+    ctx.fill();
+  }
+
+  // 粒子间连线
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const d = Math.hypot(dx, dy);
+      if (d < 130) {
+        const alpha = (1 - d / 130) * 0.18;
+        const lHue = (hue + (particles[i].hueOffset + particles[j].hueOffset) / 2) % 360;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `hsla(${lHue}, 70%, 55%, ${alpha})`;
+        ctx.lineWidth = 0.4;
+        ctx.stroke();
+      }
+    }
+  }
+
+  // 鼠标光晕
+  if (mouseX > 0 && mouseY > 0) {
+    const g = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 140);
+    g.addColorStop(0, `hsla(${hue}, 80%, 55%, 0.07)`);
+    g.addColorStop(0.5, `hsla(${hue}, 70%, 45%, 0.03)`);
+    g.addColorStop(1, 'transparent');
+    ctx.beginPath();
+    ctx.arc(mouseX, mouseY, 140, 0, Math.PI * 2);
+    ctx.fillStyle = g;
+    ctx.fill();
+  }
+}
+
+// ============================================================
+// 主循环
+// ============================================================
+function update() {
+  // 色相缓慢变化
+  targetHue = (targetHue + 0.08) % 360;
+  hue += (targetHue - hue) * 0.02;
+
+  // 鼠标平滑
+  mouseX += (targetMouseX - mouseX) * 0.06;
+  mouseY += (targetMouseY - mouseY) * 0.06;
+
+  // 卡片条位置
+  stripCurrentX += (stripTargetX - stripCurrentX) * 0.05;
+  gsap.set(stripTrack, { x: stripCurrentX });
+
+  // 更新 CSS 变量（全局色相）
+  document.documentElement.style.setProperty('--hue', Math.round(hue));
+  if (cursor) {
+    cursor.style.setProperty('--hue', Math.round(hue));
+    cursorDot.style.setProperty('--hue', Math.round(hue));
+  }
+
+  // 每张卡片的 3D 旋转
+  const vw = window.innerWidth;
+  const vCenter = vw / 2;
+  cardElements.forEach(card => {
+    const rect = card.getBoundingClientRect();
+    const cardCenter = rect.left + rect.width / 2;
+    const offset = (cardCenter - vCenter) / vw; // -0.5 ~ 0.5
+    const rotateY = offset * 35; // max ±35deg tilt
+    const scale = 1 - Math.abs(offset) * 0.15;
+    const translateZ = -Math.abs(offset) * 60;
+    const baseRot = parseFloat(card.dataset.baseRotate || 0);
+    gsap.set(card, {
+      rotateY: rotateY + baseRot,
+      scale: scale,
+      z: translateZ,
+      overwrite: 'auto'
+    });
+  });
+
+  // 自定义光标
+  if (cursor && cursorDot) {
+    gsap.set(cursor, { x: mouseX, y: mouseY, overwrite: 'auto' });
+    gsap.set(cursorDot, { x: mouseX, y: mouseY, overwrite: 'auto' });
+  }
+
+  // 粒子
+  drawParticles();
+
+  requestAnimationFrame(update);
+}
+
+// ============================================================
+// 事件处理
+// ============================================================
+function onMouseMove(e) {
+  targetMouseX = e.clientX;
+  targetMouseY = e.clientY;
+
+  // 映射鼠标 X 到卡片条位置
+  const cardW = getCardW();
+  const gap = getGap();
+  const vw = window.innerWidth;
+  const scrollRange = totalStripWidth - vw + cardW;
+  const ratio = targetMouseX / vw;
+  stripTargetX = -(ratio * scrollRange) + cardW / 2;
+}
+
+function onResize() {
+  const vw = window.innerWidth;
+  targetMouseX = vw / 2;
+  targetMouseY = window.innerHeight / 2;
+
+  // 重建卡片（因为CSS变量可能变了）
+  const cardW = getCardW();
+  const gap = getGap();
+  totalStripWidth = PHOTOS.length * (cardW + gap) - gap;
+  stripCurrentX = -(totalStripWidth / 2 - vw / 2);
+  stripTargetX = stripCurrentX;
+  gsap.set(stripTrack, { x: stripCurrentX });
+
+  initParticles();
+}
+
+// ============================================================
+// GSAP 入场动画
+// ============================================================
+function entranceAnimation() {
+  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+
+  // 卡片依次弹入（从底部飞入）
+  tl.from('.moment-card', {
+    y: 200,
+    opacity: 0,
+    rotateY: 40,
+    scale: 0.6,
+    duration: 0.7,
+    stagger: { each: 0.04, from: 'center' },
+    ease: 'back.out(1.4)'
+  }, 0.3);
+
+  // 标题
+  tl.from('.title-overlay', {
+    y: -60,
+    opacity: 0,
+    duration: 0.8
+  }, 0.1);
+
+  // 底部提示
+  tl.from('#bottomHint', {
+    y: 30,
+    opacity: 0,
+    duration: 0.6
+  }, 1.5);
+
+  // 进入博客按钮
+  tl.from('#enterBlogBtn', {
+    y: 30,
+    opacity: 0,
+    duration: 0.6,
+    ease: 'back.out(2)'
+  }, 1.8);
+
+  // 光标
+  tl.from('.cursor', { scale: 0, duration: 0.4, ease: 'back.out(2)' }, 0.3);
+  tl.from('.cursor-dot', { scale: 0, duration: 0.3 }, 0.4);
+}
+
+// ============================================================
+// 初始化
+// ============================================================
+function init() {
+  buildCards();
+  initParticles();
+  entranceAnimation();
+
+  document.addEventListener('mousemove', onMouseMove, { passive: true });
+  document.addEventListener('touchmove', e => {
+    targetMouseX = e.touches[0].clientX;
+    targetMouseY = e.touches[0].clientY;
+    const cardW = getCardW();
+    const vw = window.innerWidth;
+    const scrollRange = totalStripWidth - vw + cardW;
+    const ratio = targetMouseX / vw;
+    stripTargetX = -(ratio * scrollRange) + cardW / 2;
+  }, { passive: true });
+
+  window.addEventListener('resize', onResize);
+
+  // 初始鼠标位置
+  targetMouseX = window.innerWidth / 2;
+  targetMouseY = window.innerHeight / 2;
+}
+
+init();
+update();
+</script>
+
+</body>
+</html>

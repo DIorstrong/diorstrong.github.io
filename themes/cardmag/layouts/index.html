@@ -1,12 +1,42 @@
 {{ define "main" }}
-<div class="hero">
-  <h1>{{ site.Title }}</h1>
-  <p>{{ site.Params.description }}</p>
+
+<!-- ===== 彩虹渐变背景 ===== -->
+<div class="bg-layer" id="bgLayer"></div>
+
+<!-- ===== 粒子画布 ===== -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- ===== 自定义光标 ===== -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- ===== 标题覆盖层 ===== -->
+<div class="title-overlay">
+  <h1>{{ site.Params.author }}</h1>
+  <p>朋友圈 · 精选时刻</p>
 </div>
 
-<div class="card-grid">
+<!-- ===== 卡片滚轮 ===== -->
+<div class="strip-viewport" id="viewport">
+  <div class="strip-track" id="stripTrack">
+    <!-- JS 动态生成 -->
+  </div>
+</div>
+
+<!-- ===== 底部提示 + 按钮 ===== -->
+<div class="bottom-hint" id="bottomHint">
+  <span>移动鼠标探索照片</span>
+</div>
+<a href="/posts/" class="enter-blog-btn" id="enterBlogBtn">
+  进入博客
+  <span class="btn-arrow">↓</span>
+</a>
+
+<!-- ===== 文章区（全屏占位后显示，避免与封面重叠） ===== -->
+<section id="posts-section">
+<div id="posts" class="card-grid cover-grid">
   {{ range where site.RegularPages "Section" "posts" }}
-  <article class="card">
+  <article class="card cover-card">
     {{ with .Params.cover }}
     <div class="card-cover">
       <img src="{{ . | relURL }}" alt="{{ $.Title }}" loading="lazy">
@@ -20,7 +50,7 @@
         {{ with .Params.tags }}
         <span class="tags">
           {{ range . }}
-          <span class="tag">{{ . }}</span>
+          <span class="tag cover-tag">{{ . }}</span>
           {{ end }}
         </span>
         {{ end }}
@@ -32,4 +62,266 @@
   </article>
   {{ end }}
 </div>
+</section><!-- /#posts-section -->
+
+<script>
+// ============================================================
+// 照片列表
+// ============================================================
+const PHOTOS = [
+  "微信图片_20260531203241_484_8.jpg","微信图片_20260531203245_485_8.jpg",
+  "微信图片_20260531203249_486_8.jpg","微信图片_20260531203253_487_8.jpg",
+  "微信图片_20260531203257_488_8.jpg","微信图片_20260531203300_489_8.jpg",
+  "微信图片_20260531203303_490_8.jpg","微信图片_20260531203305_491_8.jpg",
+  "微信图片_20260531203308_492_8.jpg","微信图片_20260531203310_493_8.jpg",
+  "微信图片_20260531203313_494_8.jpg","微信图片_20260531203316_495_8.jpg",
+  "微信图片_20260531203318_496_8.jpg","微信图片_20260531203321_497_8.jpg",
+  "微信图片_20260531203324_498_8.jpg","微信图片_20260531203326_499_8.jpg",
+  "微信图片_20260531203329_500_8.jpg","微信图片_20260531203332_501_8.jpg",
+  "微信图片_20260531203341_502_8.jpg","微信图片_20260531203343_503_8.jpg",
+  "微信图片_20260531203346_504_8.jpg","微信图片_20260531203348_505_8.jpg",
+  "微信图片_20260531203351_506_8.jpg","微信图片_20260531203353_507_8.jpg",
+  "微信图片_20260531203356_508_8.jpg","微信图片_20260531203358_509_8.jpg",
+  "微信图片_20260531203400_510_8.jpg","微信图片_20260531203403_511_8.jpg",
+  "微信图片_20260531203409_512_8.jpg","微信图片_20260531203411_513_8.jpg",
+  "微信图片_20260531203413_514_8.jpg","微信图片_20260531203418_515_8.jpg",
+  "微信图片_20260531203421_516_8.jpg","微信图片_20260531203427_517_8.jpg",
+  "微信图片_20260531203430_518_8.jpg"
+];
+const IMG_BASE = '/moments/';
+
+(function() {
+  // ===== DOM 引用 =====
+  const stripTrack = document.getElementById('stripTrack');
+  const cursor = document.getElementById('cursor');
+  const cursorDot = document.getElementById('cursorDot');
+  const canvas = document.getElementById('particle-canvas');
+  if (!stripTrack || !canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  // ===== 状态 =====
+  let hue = 200, targetHue = 200;
+  let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+  let targetMouseX = mouseX, targetMouseY = mouseY;
+  let stripTargetX = 0, stripCurrentX = 0;
+  let totalStripWidth = 0;
+  let cardElements = [];
+  let width, height;
+  let particles = [];
+
+  // ===== CSS 变量读取 =====
+  function getCardW() {
+    return parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-w'));
+  }
+  function getGap() {
+    return parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap'));
+  }
+
+  // ===== 生成卡片 =====
+  function buildCards() {
+    if (!stripTrack) return;
+    const cardW = getCardW();
+    const gap = getGap();
+    stripTrack.innerHTML = '';
+    PHOTOS.forEach((filename, i) => {
+      const card = document.createElement('div');
+      card.className = 'moment-card';
+      card.innerHTML = '<div class="card-inner"><img src="' + IMG_BASE + filename + '" alt="Moment ' + (i+1) + '" loading="lazy"><div class="card-shine"></div></div>';
+      card.dataset.baseRotate = ((Math.random() - 0.5) * 4).toFixed(2);
+      card.dataset.index = i;
+      stripTrack.appendChild(card);
+    });
+    cardElements = [...stripTrack.querySelectorAll('.moment-card')];
+    totalStripWidth = PHOTOS.length * (cardW + gap) - gap;
+    stripCurrentX = -(totalStripWidth / 2 - window.innerWidth / 2);
+    stripTargetX = stripCurrentX;
+    gsap.set(stripTrack, { x: stripCurrentX });
+  }
+
+  // ===== 粒子系统 =====
+  function initParticles() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    particles = [];
+    const pc = window.innerWidth < 768 ? 40 : 70;
+    for (let i = 0; i < pc; i++) {
+      particles.push({
+        x: Math.random() * width, y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5,
+        r: Math.random() * 2 + 0.8, hueOffset: Math.random() * 360,
+        opacity: 0.2 + Math.random() * 0.5
+      });
+    }
+  }
+
+  function drawParticles() {
+    ctx.clearRect(0, 0, width, height);
+    for (const p of particles) {
+      p.vx += (Math.random() - 0.5) * 0.015;
+      p.vy += (Math.random() - 0.5) * 0.015;
+      p.vx *= 0.998; p.vy *= 0.998;
+      const dx = p.x - mouseX, dy = p.y - mouseY;
+      const dist = Math.hypot(dx, dy);
+      if (dist < 160 && dist > 0) {
+        const f = (160 - dist) / 160;
+        p.vx += Math.cos(Math.atan2(dy, dx)) * f * 0.12;
+        p.vy += Math.sin(Math.atan2(dy, dx)) * f * 0.12;
+        p.opacity = Math.min(0.9, p.opacity + 0.015);
+      } else {
+        p.opacity = Math.max(0.1, p.opacity - 0.003);
+      }
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < -30) p.x = width + 30;
+      if (p.x > width + 30) p.x = -30;
+      if (p.y < -30) p.y = height + 30;
+      if (p.y > height + 30) p.y = -30;
+      const pHue = (hue + p.hueOffset) % 360;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'hsla(' + pHue + ',70%,60%,' + p.opacity + ')';
+      ctx.fill();
+    }
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y;
+        const d = Math.hypot(dx, dy);
+        if (d < 130) {
+          const alpha = (1 - d / 130) * 0.18;
+          const lHue = (hue + (particles[i].hueOffset + particles[j].hueOffset) / 2) % 360;
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = 'hsla(' + lHue + ',70%,55%,' + alpha + ')';
+          ctx.lineWidth = 0.4;
+          ctx.stroke();
+        }
+      }
+    }
+    if (mouseX > 0 && mouseY > 0) {
+      const g = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 140);
+      g.addColorStop(0, 'hsla(' + hue + ',80%,55%,0.07)');
+      g.addColorStop(0.5, 'hsla(' + hue + ',70%,45%,0.03)');
+      g.addColorStop(1, 'transparent');
+      ctx.beginPath();
+      ctx.arc(mouseX, mouseY, 140, 0, Math.PI * 2);
+      ctx.fillStyle = g;
+      ctx.fill();
+    }
+  }
+
+  // ===== 主循环 =====
+  function update() {
+    targetHue = (targetHue + 0.08) % 360;
+    hue += (targetHue - hue) * 0.02;
+    mouseX += (targetMouseX - mouseX) * 0.06;
+    mouseY += (targetMouseY - mouseY) * 0.06;
+    stripCurrentX += (stripTargetX - stripCurrentX) * 0.05;
+    gsap.set(stripTrack, { x: stripCurrentX });
+
+    document.documentElement.style.setProperty('--hue', Math.round(hue));
+
+    const vw = window.innerWidth;
+    const vCenter = vw / 2;
+    cardElements.forEach(card => {
+      const rect = card.getBoundingClientRect();
+      const cardCenter = rect.left + rect.width / 2;
+      const offset = (cardCenter - vCenter) / vw;
+      const baseRot = parseFloat(card.dataset.baseRotate || 0);
+      gsap.set(card, {
+        rotateY: offset * 35 + baseRot,
+        scale: 1 - Math.abs(offset) * 0.15,
+        z: -Math.abs(offset) * 60,
+        overwrite: 'auto'
+      });
+    });
+
+    if (cursor && cursorDot) {
+      gsap.set(cursor, { x: mouseX, y: mouseY, overwrite: 'auto' });
+      gsap.set(cursorDot, { x: mouseX, y: mouseY, overwrite: 'auto' });
+    }
+    drawParticles();
+    requestAnimationFrame(update);
+  }
+
+  // ===== 鼠标事件 =====
+  function onMouseMove(e) {
+    targetMouseX = e.clientX;
+    targetMouseY = e.clientY;
+    const cardW = getCardW();
+    const vw = window.innerWidth;
+    const scrollRange = totalStripWidth - vw + cardW;
+    const ratio = targetMouseX / vw;
+    stripTargetX = -(ratio * scrollRange) + cardW / 2;
+  }
+
+  function onResize() {
+    targetMouseX = window.innerWidth / 2;
+    targetMouseY = window.innerHeight / 2;
+    const cardW = getCardW();
+    const gap = getGap();
+    totalStripWidth = PHOTOS.length * (cardW + gap) - gap;
+    stripCurrentX = -(totalStripWidth / 2 - window.innerWidth / 2);
+    stripTargetX = stripCurrentX;
+    gsap.set(stripTrack, { x: stripCurrentX });
+    initParticles();
+  }
+
+  // ===== 入场动画 =====
+  function entranceAnimation() {
+    gsap.registerPlugin(ScrollTrigger);
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    tl.from('.moment-card', {
+      y: 200, opacity: 0, rotateY: 40, scale: 0.6,
+      duration: 0.7, stagger: { each: 0.04, from: 'center' },
+      ease: 'back.out(1.4)'
+    }, 0.3);
+    tl.from('.title-overlay', { y: -60, opacity: 0, duration: 0.8 }, 0.1);
+    tl.from('#bottomHint', { y: 30, opacity: 0, duration: 0.6 }, 1.5);
+    tl.from('#enterBlogBtn', { y: 30, opacity: 0, duration: 0.6, ease: 'back.out(2)' }, 1.8);
+    tl.from('.cursor', { scale: 0, duration: 0.4, ease: 'back.out(2)' }, 0.3);
+    tl.from('.cursor-dot', { scale: 0, duration: 0.3 }, 0.4);
+
+    // 文章卡片滚动入场
+    gsap.from('.cover-card', {
+      scrollTrigger: { trigger: '#posts', start: 'top 85%', toggleActions: 'play none none none' },
+      opacity: 0, y: 50, duration: 0.6, stagger: 0.1, ease: 'power3.out'
+    });
+  }
+
+  // ===== 启动 =====
+  buildCards();
+  initParticles();
+  entranceAnimation();
+
+  document.addEventListener('mousemove', onMouseMove, { passive: true });
+  document.addEventListener('touchmove', function(e) {
+    targetMouseX = e.touches[0].clientX;
+    targetMouseY = e.touches[0].clientY;
+    const cardW = getCardW();
+    const vw = window.innerWidth;
+    const scrollRange = totalStripWidth - vw + cardW;
+    targetMouseX = Math.max(0, Math.min(vw, targetMouseX));
+    stripTargetX = -( (targetMouseX / vw) * scrollRange) + cardW / 2;
+  }, { passive: true });
+  window.addEventListener('resize', onResize);
+  targetMouseX = window.innerWidth / 2;
+  targetMouseY = window.innerHeight / 2;
+
+  // "进入博客"按钮 → 平滑滚动到文章区
+  var enterBtn = document.getElementById('enterBlogBtn');
+  if (enterBtn) {
+    enterBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var posts = document.getElementById('posts');
+      if (posts) {
+        gsap.to(window, { duration: 1.2, scrollTo: { y: posts, offsetY: 20 }, ease: 'power3.inOut' });
+      } else {
+        window.location.href = '/posts/';
+      }
+    });
+  }
+
+  update();
+})();
+</script>
 {{ end }}

@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>思晨的博客 · 管理工具</title>
+<script src="https://cdn.jsdelivr.net/npm/marked@11/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root {
+    --bg: #0d0d14; --surface: #16161f; --border: #252530;
+    --text: #e0e0e0; --text-dim: #888; --accent: #4dabf7;
+    --accent2: #ff6b6b; --green: #51cf66;
+    --radius: 10px;
+  }
+  body {
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background: var(--bg); color: var(--text);
+    height: 100vh; overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== 顶部栏 ===== */
+  .toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px; background: var(--surface);
+    border-bottom: 1px solid var(--border); z-index: 10;
+    gap: 16px; flex-wrap: wrap;
+  }
+  .toolbar-brand {
+    font-size: 1.1rem; font-weight: 700;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toolbar-brand span { color: var(--accent); }
+  .toolbar-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .toolbar-status { font-size: 0.78rem; color: var(--text-dim); margin-left: 12px; }
+
+  /* ===== 按钮 ===== */
+  .btn {
+    padding: 8px 18px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text);
+    font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s; font-family: inherit;
+    display: inline-flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-primary:hover { background: #3d9be7; color: #fff; }
+  .btn-danger { border-color: var(--accent2); color: var(--accent2); }
+  .btn-danger:hover { background: var(--accent2); color: #fff; }
+  .btn-success { border-color: var(--green); color: var(--green); }
+  .btn-success:hover { background: var(--green); color: #fff; }
+  .btn-sm { padding: 5px 12px; font-size: 0.78rem; }
+
+  /* ===== 主布局 ===== */
+  .main-layout { display: flex; height: calc(100vh - 57px); }
+  .sidebar {
+    width: 260px; min-width: 260px; background: var(--surface);
+    border-right: 1px solid var(--border); overflow-y: auto;
+    display: flex; flex-direction: column;
+  }
+  .sidebar-header {
+    padding: 16px; border-bottom: 1px solid var(--border);
+    font-size: 0.82rem; color: var(--text-dim);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .post-item {
+    padding: 14px 16px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03);
+    transition: all 0.2s; display: flex; flex-direction: column; gap: 4px;
+  }
+  .post-item:hover { background: rgba(255,255,255,0.03); }
+  .post-item.active { background: rgba(77,171,247,0.1); border-left: 3px solid var(--accent); }
+  .post-item .post-title { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+  .post-item .post-info { font-size: 0.72rem; color: var(--text-dim); display: flex; gap: 10px; }
+
+  /* ===== 编辑区 ===== */
+  .editor-area {
+    flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .editor-empty {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim); flex-direction: column; gap: 12px;
+  }
+  .editor-empty h2 { color: var(--text); font-size: 1.4rem; }
+  .editor-form {
+    flex: 1; overflow-y: auto; padding: 24px;
+    display: none; flex-direction: column; gap: 20px;
+  }
+  .editor-form.visible { display: flex; }
+
+  /* ===== 表单 ===== */
+  .form-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label {
+    font-size: 0.78rem; color: var(--text-dim);
+    text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;
+  }
+  .form-group input, .form-group textarea, .form-group select {
+    padding: 10px 14px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--text); font-size: 0.9rem;
+    font-family: inherit; transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group textarea:focus {
+    outline: none; border-color: var(--accent);
+  }
+  .form-group textarea { resize: vertical; min-height: 300px; font-family: "SF Mono",Monaco,monospace; font-size: 0.85rem; line-height: 1.6; }
+  .form-group .hint { font-size: 0.72rem; color: var(--text-dim); }
+
+  /* ===== 预览面板 ===== */
+  .preview-panel {
+    display: none; padding: 24px; overflow-y: auto;
+    border-top: 1px solid var(--border); background: var(--bg);
+  }
+  .preview-panel.visible { display: block; }
+  .preview-panel h1 { font-size: 1.8rem; margin-bottom: 16px; }
+  .preview-panel h2 { font-size: 1.3rem; margin: 24px 0 10px; color: var(--accent); }
+  .preview-panel p { margin-bottom: 12px; line-height: 1.8; }
+  .preview-panel img { max-width: 100%; border-radius: 8px; }
+  .preview-panel code { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  .preview-panel pre { background: #1a1a24; padding: 16px; border-radius: 8px; overflow-x: auto; }
+  .preview-panel pre code { background: none; padding: 0; }
+
+  /* ===== 弹窗 ===== */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    z-index: 100; display: none; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px;
+    max-width: 500px; width: 90%;
+  }
+  .modal h3 { margin-bottom: 16px; font-size: 1.2rem; }
+  .modal .form-group { margin-bottom: 16px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 200;
+    padding: 12px 24px; border-radius: 8px; font-size: 0.9rem; font-weight: 600;
+    opacity: 0; transform: translateY(20px);
+    transition: all 0.3s ease;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.success { background: #2b8a3e; color: #fff; }
+  .toast.error { background: #c92a2a; color: #fff; }
+  .toast.info { background: var(--accent); color: #fff; }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 768px) {
+    .sidebar { width: 100%; min-width: 0; max-height: 200px; }
+    .main-layout { flex-direction: column; }
+    .form-row { grid-template-columns: 1fr; }
+    .toolbar { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 顶部工具栏 -->
+<div class="toolbar">
+  <div class="toolbar-brand">🔧 <span>思晨的博客</span> · 管理工具</div>
+  <div class="toolbar-actions">
+    <button class="btn btn-primary" onclick="openProject()" id="btnOpen">📂 打开项目目录</button>
+    <button class="btn" onclick="newPost()" id="btnNew" disabled>➕ 新建文章</button>
+    <button class="btn btn-success" onclick="savePost()" id="btnSave" disabled>💾 保存</button>
+    <button class="btn btn-danger btn-sm" onclick="deletePost()" id="btnDelete" disabled>🗑 删除</button>
+    <button class="btn btn-sm" onclick="togglePreview()">👁 预览</button>
+    <span class="toolbar-status" id="statusText">请先打开项目目录</span>
+  </div>
+</div>
+
+<!-- 主体布局 -->
+<div class="main-layout">
+  <!-- 侧边栏：文章列表 -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      📝 文章列表
+      <span id="postCount" style="color:var(--accent)">—</span>
+    </div>
+    <div id="postList" style="overflow-y:auto;flex:1">
+      <div style="padding:20px;text-align:center;color:var(--text-dim)">
+        打开项目目录后自动加载
+      </div>
+    </div>
+  </div>
+
+  <!-- 编辑区 -->
+  <div class="editor-area">
+    <div class="editor-empty" id="editorEmpty">
+      <h2>📝 选择一个文章开始编辑</h2>
+      <p style="color:var(--text-dim)">或点击「新建文章」创建新内容</p>
+    </div>
+
+    <div class="editor-form" id="editorForm">
+      <div class="form-row">
+        <div class="form-group" style="grid-column:1/-1">
+          <label>标题</label>
+          <input type="text" id="inputTitle" placeholder="文章标题">
+        </div>
+        <div class="form-group">
+          <label>日期</label>
+          <input type="datetime-local" id="inputDate">
+        </div>
+        <div class="form-group">
+          <label>标签（逗号分隔）</label>
+          <input type="text" id="inputTags" placeholder="例如：学习, 思考, 技术">
+        </div>
+        <div class="form-group">
+          <label>摘要</label>
+          <input type="text" id="inputDesc" placeholder="简短描述">
+        </div>
+        <div class="form-group">
+          <label>封面图路径（可选）</label>
+          <input type="text" id="inputCover" placeholder="例如：/posts/cover.jpg">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>正文 （Markdown）</label>
+        <textarea id="inputBody" placeholder="在这里写 Markdown 内容..."></textarea>
+      </div>
+    </div>
+
+    <!-- 预览 -->
+    <div class="preview-panel" id="previewPanel">
+      <div id="previewContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 新建文章弹窗 -->
+<div class="modal-overlay" id="modalNew">
+  <div class="modal">
+    <h3>➕ 新建文章</h3>
+    <div class="form-group">
+      <label>文件名（不含扩展名）</label>
+      <input type="text" id="newFilename" placeholder="例如：my-first-post">
+      <span class="hint">英文、数字和连字符，例如 study-notes</span>
+    </div>
+    <div class="form-group">
+      <label>标题</label>
+      <input type="text" id="newTitle" placeholder="文章标题">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="confirmNewPost()">创建</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// 状态管理
+// ============================================================
+const state = {
+  dirHandle: null,
+  posts: [],
+  currentFile: null,       // 当前编辑的文件名
+  currentHandle: null,     // 当前文件的 FileSystemFileHandle
+  isNew: false,
+  modified: false
+};
+
+// ============================================================
+// DOM 引用
+// ============================================================
+const $ = id => document.getElementById(id);
+const postList = $('postList');
+const editorForm = $('editorForm');
+const editorEmpty = $('editorEmpty');
+const previewPanel = $('previewPanel');
+const previewContent = $('previewContent');
+const statusText = $('statusText');
+const toast = $('toast');
+
+// ============================================================
+// Toast 通知
+// ============================================================
+let toastTimer;
+function showToast(msg, type = 'info') {
+  toast.textContent = msg;
+  toast.className = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// 打开项目目录
+// ============================================================
+async function openProject() {
+  try {
+    state.dirHandle = await window.showDirectoryPicker({
+      mode: 'readwrite',
+      startIn: 'documents'
+    });
+    statusText.textContent = '✅ 已连接项目';
+    $('btnNew').disabled = false;
+    await loadPosts();
+    showToast('项目已加载！', 'success');
+
+    // 动画
+    gsap.from('.post-item', { opacity: 0, x: -20, duration: 0.3, stagger: 0.03 });
+  } catch (e) {
+    if (e.name !== 'AbortError') {
+      showToast('打开目录失败: ' + e.message, 'error');
+    }
+  }
+}
+
+// ============================================================
+// 加载文章列表
+// ============================================================
+async function loadPosts() {
+  if (!state.dirHandle) return;
+  state.posts = [];
+
+  // 尝试进入 content/posts/
+  let postsDir = state.dirHandle;
+  try {
+    const contentDir = await state.dirHandle.getDirectoryHandle('content');
+    postsDir = await contentDir.getDirectoryHandle('posts');
+  } catch (e) {
+    try {
+      postsDir = await state.dirHandle.getDirectoryHandle('content');
+    } catch (e2) {
+      showToast('未找到 content 目录，请确认选择了 Hugo 项目根目录', 'error');
+      return;
+    }
+  }
+
+  try {
+    for await (const [name, handle] of postsDir.entries()) {
+      if (handle.kind === 'file' && name.endsWith('.md')) {
+        const file = await handle.getFile();
+        const content = await file.text();
+        const frontmatter = parseFrontmatter(content);
+        state.posts.push({
+          filename: name,
+          handle: handle,
+          ...frontmatter
+        });
+      }
+      // 子目录中的文章
+      if (handle.kind === 'directory') {
+        for await (const [subName, subHandle] of handle.entries()) {
+          if (subHandle.kind === 'file' && subName === 'index.md') {
+            const file = await subHandle.getFile();
+            const content = await file.text();
+            const frontmatter = parseFrontmatter(content);
+            state.posts.push({
+              filename: name + '/index.md',
+              handle: subHandle,
+              ...frontmatter
+            });
+          }
+        }
+      }
+    }
+  } catch (e) {
+    showToast('读取文章列表失败: ' + e.message, 'error');
+    return;
+  }
+
+  // 按日期排序
+  state.posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+  $('postCount').textContent = state.posts.length + ' 篇';
+  renderPostList();
+}
+
+// ============================================================
+// 解析/生成 Frontmatter
+// ============================================================
+function parseFrontmatter(text) {
+  const match = text.match(/^\+\+\+\s*\n([\s\S]*?)\n\+\+\+\s*\n([\s\S]*)$/);
+  if (!match) return { title: '', date: '', tags: [], description: '', cover: '', body: text };
+
+  const fm = {};
+  const lines = match[1].split('\n');
+  let currentKey = '';
+  let inArray = false;
+  let arrayValues = [];
+
+  for (const line of lines) {
+    const arrMatch = line.match(/^\s*-\s+(.+)/);
+    if (inArray && arrMatch) {
+      arrayValues.push(arrMatch[1].replace(/['"]/g, ''));
+      continue;
+    } else if (inArray && !arrMatch) {
+      fm[currentKey] = arrayValues;
+      inArray = false;
+      arrayValues = [];
+    }
+
+    const kv = line.match(/^(\w+)\s*=\s*(.+)/);
+    if (kv) {
+      const key = kv[1];
+      let val = kv[2].trim().replace(/^['"]|['"]$/g, '');
+      if (val === 'true') val = true;
+      if (val === 'false') val = false;
+      if (val.startsWith('[') && val.endsWith(']')) {
+        val = val.slice(1, -1).split(',').map(s => s.trim().replace(/['"]/g, ''));
+      }
+      fm[key] = val;
+    }
+
+    if (line.trim() === '' && !inArray) {
+      // 标记数组开始
+      const nextLine = lines[lines.indexOf(line) + 1];
+      if (nextLine && nextLine.trim().startsWith('- ')) {
+        inArray = true;
+        currentKey = Object.keys(fm).pop();
+        arrayValues = [];
+      }
+    }
+  }
+  if (inArray) fm[currentKey] = arrayValues;
+
+  fm.body = match[2];
+  if (!fm.title) fm.title = '';
+  if (!fm.date) fm.date = new Date().toISOString().slice(0, 10) + 'T12:00:00+08:00';
+  if (!fm.tags) fm.tags = [];
+  if (!fm.description) fm.description = '';
+  if (!fm.cover) fm.cover = '';
+
+  return fm;
+}
+
+function generateFrontmatter(data) {
+  let fm = '+++\n';
+  fm += `title = '${data.title}'\n`;
+  fm += `date = '${data.date}'\n`;
+  fm += `draft = false\n`;
+  if (data.description) fm += `description = '${data.description}'\n`;
+  if (data.tags && data.tags.length > 0) {
+    fm += `tags = [${data.tags.map(t => `'${t.trim()}'`).join(', ')}]\n`;
+  }
+  if (data.cover) fm += `cover = '${data.cover}'\n`;
+  fm += '+++\n\n';
+  fm += data.body || '';
+  return fm;
+}
+
+// ============================================================
+// 渲染文章列表
+// ============================================================
+function renderPostList() {
+  if (state.posts.length === 0) {
+    postList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-dim)">暂无文章</div>';
+    return;
+  }
+  postList.innerHTML = state.posts.map((p, i) => `
+    <div class="post-item" data-index="${i}" onclick="selectPost(${i})">
+      <div class="post-title">${p.title || '无标题'}</div>
+      <div class="post-info">
+        <span>${formatDate(p.date)}</span>
+        ${p.tags && p.tags.length ? '<span>' + p.tags.slice(0, 3).join(' · ') + '</span>' : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function formatDate(d) {
+  if (!d) return '';
+  try { return new Date(d).toLocaleDateString('zh-CN'); } catch (e) { return d; }
+}
+
+// ============================================================
+// 选择文章
+// ============================================================
+async function selectPost(index) {
+  if (state.modified) {
+    if (!confirm('当前文章有未保存的修改，是否放弃？')) return;
+  }
+
+  const post = state.posts[index];
+  state.currentFile = post.filename;
+  state.currentHandle = post.handle;
+  state.isNew = false;
+  state.modified = false;
+
+  // 读文件
+  const file = await post.handle.getFile();
+  const content = await file.text();
+  const fm = parseFrontmatter(content);
+
+  // 填充表单
+  $('inputTitle').value = fm.title || '';
+  $('inputDate').value = formatDateForInput(fm.date);
+  $('inputTags').value = Array.isArray(fm.tags) ? fm.tags.join(', ') : (fm.tags || '');
+  $('inputDesc').value = fm.description || '';
+  $('inputCover').value = fm.cover || '';
+  $('inputBody').value = fm.body || '';
+
+  // UI 状态
+  editorEmpty.style.display = 'none';
+  editorForm.classList.add('visible');
+  $('btnSave').disabled = false;
+  $('btnDelete').disabled = false;
+  statusText.textContent = `📝 编辑中: ${post.filename}`;
+
+  // 列表高亮
+  document.querySelectorAll('.post-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.post-item[data-index="${index}"]`)?.classList.add('active');
+
+  // 动画
+  gsap.from(editorForm, { opacity: 0, y: 10, duration: 0.3 });
+
+  updatePreview();
+}
+
+// ============================================================
+// 新建文章
+// ============================================================
+function newPost() {
+  if (!state.dirHandle) { showToast('请先打开项目目录', 'error'); return; }
+  $('modalNew').classList.add('open');
+  $('newFilename').value = '';
+  $('newTitle').value = '';
+  gsap.from('.modal', { scale: 0.9, opacity: 0, duration: 0.25, ease: 'back.out(1.5)' });
+}
+
+function closeModal() {
+  $('modalNew').classList.remove('open');
+}
+
+async function confirmNewPost() {
+  const filename = $('newFilename').value.trim();
+  const title = $('newTitle').value.trim();
+  if (!filename) { showToast('请输入文件名', 'error'); return; }
+
+  const safeFilename = filename.replace(/[^a-zA-Z0-9一-鿿_-]/g, '-') + '.md';
+  const now = new Date();
+  const dateStr = now.getFullYear() + '-' +
+    String(now.getMonth() + 1).padStart(2, '0') + '-' +
+    String(now.getDate()).padStart(2, '0') + 'T' +
+    String(now.getHours()).padStart(2, '0') + ':' +
+    String(now.getMinutes()).padStart(2, '0') + ':' +
+    '00+08:00';
+
+  const content = generateFrontmatter({
+    title: title || filename,
+    date: dateStr,
+    tags: [],
+    description: '',
+    cover: '',
+    body: '\n开始写你的内容...\n'
+  });
+
+  // 写入文件
+  try {
+    let postsDir = state.dirHandle;
+    try {
+      const contentDir = await state.dirHandle.getDirectoryHandle('content');
+      postsDir = await contentDir.getDirectoryHandle('posts');
+    } catch (e) {
+      postsDir = await state.dirHandle.getDirectoryHandle('content');
+    }
+
+    const fileHandle = await postsDir.getFileHandle(safeFilename, { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(content);
+    await writable.close();
+
+    closeModal();
+    await loadPosts();
+
+    // 找到并选中新文章
+    const idx = state.posts.findIndex(p => p.filename === safeFilename);
+    if (idx >= 0) selectPost(idx);
+
+    showToast('文章创建成功！🎉', 'success');
+  } catch (e) {
+    showToast('创建失败: ' + e.message, 'error');
+  }
+}
+
+// ============================================================
+// 保存文章
+// ============================================================
+async function savePost() {
+  if (!state.currentHandle) { showToast('没有打开的文章', 'error'); return; }
+
+  const data = {
+    title: $('inputTitle').value,
+    date: $('inputDate').value + '+08:00',
+    tags: $('inputTags').value.split(',').map(t => t.trim()).filter(Boolean),
+    description: $('inputDesc').value,
+    cover: $('inputCover').value,
+    body: $('inputBody').value
+  };
+
+  const content = generateFrontmatter(data);
+
+  try {
+    const writable = await state.currentHandle.createWritable();
+    await writable.write(content);
+    await writable.close();
+
+    state.modified = false;
+    statusText.textContent = `💾 已保存: ${state.currentFile}`;
+    showToast('保存成功！💾', 'success');
+
+    // 刷新列表（更新日期等）
+    await loadPosts();
+  } catch (e) {
+    showToast('保存失败: ' + e.message, 'error');
+  }
+}
+
+// ============================================================
+// 删除文章
+// ============================================================
+async function deletePost() {
+  if (!state.currentHandle || !state.currentFile) return;
+  if (!confirm(`确定要删除「${state.currentFile}」吗？此操作不可撤销！`)) return;
+
+  try {
+    let postsDir = state.dirHandle;
+    try {
+      const contentDir = await state.dirHandle.getDirectoryHandle('content');
+      postsDir = await contentDir.getDirectoryHandle('posts');
+    } catch (e) {
+      postsDir = await state.dirHandle.getDirectoryHandle('content');
+    }
+
+    await postsDir.removeEntry(state.currentFile);
+
+    state.currentFile = null;
+    state.currentHandle = null;
+    state.modified = false;
+
+    editorForm.classList.remove('visible');
+    editorEmpty.style.display = 'flex';
+    $('btnSave').disabled = true;
+    $('btnDelete').disabled = true;
+    statusText.textContent = '✅ 已连接项目';
+
+    await loadPosts();
+    showToast('文章已删除', 'info');
+  } catch (e) {
+    showToast('删除失败: ' + e.message, 'error');
+  }
+}
+
+// ============================================================
+// 预览
+// ============================================================
+function togglePreview() {
+  const showing = previewPanel.classList.contains('visible');
+  if (showing) {
+    previewPanel.classList.remove('visible');
+  } else {
+    updatePreview();
+    previewPanel.classList.add('visible');
+    gsap.from(previewPanel, { opacity: 0, y: 10, duration: 0.3 });
+  }
+}
+
+function updatePreview() {
+  const body = $('inputBody').value || '';
+  const html = marked.parse(body);
+  const title = $('inputTitle').value || '预览';
+  const date = $('inputDate').value || '';
+  const tags = $('inputTags').value || '';
+  previewContent.innerHTML = `
+    <h1>${title}</h1>
+    ${date ? `<p style="color:var(--text-dim)">📅 ${date}</p>` : ''}
+    ${tags ? `<p style="color:var(--accent)">🏷 ${tags}</p>` : ''}
+    <hr style="border-color:var(--border);margin:20px 0">
+    ${html}
+  `;
+}
+
+// ============================================================
+// 辅助
+// ============================================================
+function formatDateForInput(d) {
+  if (!d) return '';
+  try {
+    const dt = new Date(d);
+    return dt.getFullYear() + '-' +
+      String(dt.getMonth() + 1).padStart(2,'0') + '-' +
+      String(dt.getDate()).padStart(2,'0') + 'T' +
+      String(dt.getHours()).padStart(2,'0') + ':' +
+      String(dt.getMinutes()).padStart(2,'0');
+  } catch (e) { return ''; }
+}
+
+// 修改检测
+['inputTitle','inputDate','inputTags','inputDesc','inputCover','inputBody'].forEach(id => {
+  $(id)?.addEventListener('input', () => {
+    if (state.currentHandle) {
+      state.modified = true;
+      statusText.textContent = `✏️ 未保存: ${state.currentFile}`;
+    }
+  });
+});
+
+// 快捷键
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    savePost();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+    e.preventDefault();
+    newPost();
+  }
+});
+
+// 初始化
+statusText.textContent = '📂 点击「打开项目目录」开始';
+</script>
+</body>
+</html>
